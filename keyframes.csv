@@ -1,0 +1,4 @@
+car_position,car_rotation,camera_0_position,camera_0_rotation,camera_2_position,camera_2_rotation,camera_1_position,camera_1_rotation,camera_3_position,camera_3_rotation
+0.0,90.0,-15.0,90.0,-15.0,90.0,15.0,90.0,15.0,90.0
+0.0,0.0,15.0,0.0,-15.0,0.0,15.0,0.0,-15.0,0.0
+1.0,-126.0,3.5,-90.0,3.5,-90.0,3.5,90.0,3.5,90.0

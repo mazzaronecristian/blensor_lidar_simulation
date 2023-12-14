@@ -1,0 +1,9 @@
+__pycache__/
+assets/barrier/
+assets/road/
+
+scan_camera_*.csv
+scan_camera_*.numpy
+create_csv.py
+analize.py
+```

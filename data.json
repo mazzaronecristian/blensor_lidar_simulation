@@ -1,0 +1,20 @@
+{
+  "columns": [
+    "timestamp",
+    "yaw",
+    "pitch",
+    "distance",
+    "distance_noise",
+    "x",
+    "y",
+    "z",
+    "x_noise",
+    "y_noise",
+    "z_noise",
+    "object_id",
+    "color",
+    "color",
+    "color",
+    "id"
+  ]
+}
