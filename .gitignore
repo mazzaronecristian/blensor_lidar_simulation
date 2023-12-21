@@ -1,6 +1,7 @@
 __pycache__/
 assets/barrier/
 assets/road/
+assets/bus/
 
 scan_camera_*.csv
 scan_camera_*.numpy
