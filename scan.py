@@ -2,6 +2,7 @@ import bpy
 from bpy import data as D
 from bpy import context as C
 from mathutils import *
+import math
 from math import *
 import blensor
 import json
@@ -20,8 +21,8 @@ class Vehicle:
         self.name = name
 
         # posizione e direzione iniziale
-        self.position = (self.keyframes["x"][79], self.keyframes["y"][79], 1.0)
-        self.heading = (0, 0, self.keyframes["heading"][0])
+        self.position = (self.keyframes["x"][0], self.keyframes["y"][0], 1.0)
+        self.heading = (math.radians(90), 0, self.keyframes["heading"][0])
 
     # scrivi le funzioni per muovere la macchina
     def move(self, position, heading):
@@ -130,8 +131,8 @@ trajectory_1 = loc_rot[loc_rot["label"] == labels[0]].reset_index(drop=True)
 trajectory_2 = loc_rot[loc_rot["label"] == labels[1]].reset_index(drop=True)
 
 # * carico la ford thunderbird 1961 nella scena
-vehicle_1 = Vehicle("assets/ford.obj", trajectory_1, "vehicle1", "vehicle1")
-vehicle_2 = Vehicle("assets/ford.obj", trajectory_2, "vehicle2", "vehicle2")
+vehicle_1 = Vehicle("ford_scaled.obj", trajectory_1, "vehicle1", "vehicle1")
+vehicle_2 = Vehicle("assets/bus.obj", trajectory_2, "vehicle2", "vehicle2")
 vehicles = [vehicle_1, vehicle_2]
 scene = Scene(vehicles)
 
