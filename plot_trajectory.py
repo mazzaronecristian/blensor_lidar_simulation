@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+# trajectories: dictionary of pandas dataframes
+# trajectories = {
+#     "label1": pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]}),
+#     "label2": pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]}),
+#     ...}
+# plot all trajectories in the dictionary
 def plot_all_trajectories(trajectories):
     # * plot all trajectories
     for label in trajectories:
@@ -13,6 +19,9 @@ def plot_all_trajectories(trajectories):
     plt.show()
 
 
+# trajectory: pandas dataframe like pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+# name: string (name of the trajectory)
+# plot trajectory
 def plot_trajectory(trajectory, name):
     # * plot trajectory
     plt.plot(trajectory["x"], trajectory["y"], label=name)
