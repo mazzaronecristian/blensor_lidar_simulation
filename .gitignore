@@ -3,8 +3,10 @@ assets/barrier/
 assets/road/
 assets/bus/
 
+camera_*.csv
 scan_camera_*.csv
-scan_camera_*.numpy
+camera_*.numpy
 create_csv.py
 analize.py
+my_simulation.py
 ```
