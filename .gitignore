@@ -2,11 +2,13 @@ __pycache__/
 assets/barrier/
 assets/road/
 assets/bus/
+scenario/
+```
 
+scans/
 camera_*.csv
 scan_camera_*.csv
 camera_*.numpy
 create_csv.py
 analize.py
-my_simulation.py
 ```
