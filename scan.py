@@ -8,6 +8,9 @@ import math
 from math import *
 import numpy as np
 import pandas as pd
+import plot_trajectory as pt
+
+# import scenario as sn
 
 
 class Vehicle:
@@ -16,15 +19,33 @@ class Vehicle:
         self.keyframes = keyframes
         self.sensors = sensors
         self.name = name
+        self.current_step = 0
 
         # * posizione e direzione iniziale
-        self.position = (self.keyframes["x"][0], self.keyframes["y"][0], 1.0)
+        self.position = (
+            self.keyframes["x"][self.current_step],
+            self.keyframes["y"][self.current_step],
+            1.0,
+        )
         # * i modelli vengono ruotati di -90 gradi attorno a x di default. Per questo motivo aggiungo 90 gradi
         self.heading = (math.radians(90), 0, self.keyframes["heading"][0])
 
     def move(self, position, heading):
         self.position = position
         self.heading = heading
+
+    def move(self):
+        self.current_step += 1
+        self.position = (
+            self.keyframes["x"][self.current_step],
+            self.keyframes["y"][self.current_step],
+            1.0,
+        )
+        self.heading = (
+            math.radians(90),
+            0,
+            self.keyframes["heading"][self.current_step],
+        )
 
 
 class Sensor:
@@ -86,7 +107,17 @@ class Scene:
             current_sensor.name = sensor.name
             current_sensor.data.name = f"{sensor.name}_Data"
 
-    def scan(self):
+    def update(self):
+        for vehicle in self.vehicles:
+            vehicle.move()
+            car_object = bpy.data.objects[vehicle.name]
+            car_object.location = vehicle.position
+            car_object.rotation_euler = vehicle.heading
+
+    # esegui un refactoring del codice per eliminare la ripetizione di codice
+
+    # * esegue una scansione e salva i dati in scans/csv/{sensor.name}_{i}.csv e scans/numpy/{sensor.name}_{i}.numpy
+    def scan(self, i=None):
         with open("data.json", "r") as file:
             data = json.load(file)
 
@@ -101,6 +132,15 @@ class Scene:
 
             total_rotation = rotation_scan_z * rotation_scan_y * rotation_scan_x
 
+            evd_filename = f"scans/numpy/{sensor.name}"
+            csv_filename = f"scans/csv/{sensor.name}"
+
+            if i is not None:
+                evd_filename += f"_{i}_"
+                csv_filename += f"_{i}"
+
+            csv_filename += ".csv"
+
             # * eseguo la scansione
             blensor.blendodyne.scan_advanced(
                 current_sensor,
@@ -108,7 +148,7 @@ class Scene:
                 simulation_fps=24,
                 angle_resolution=0.1728,
                 max_distance=100,
-                evd_file=f"{sensor.name}.numpy",
+                evd_file=f"{evd_filename}.numpy",
                 noise_mu=0.0,
                 noise_sigma=0.03,
                 start_angle=-90.0,
@@ -118,15 +158,32 @@ class Scene:
                 add_noisy_blender_mesh=False,
                 world_transformation=total_rotation,
             )
-
-            scan = np.loadtxt(f"{sensor.name}00000.numpy")
+            evd_filename += f"00000.numpy"
+            scan = np.loadtxt(evd_filename)
             rounded_scan = np.round(scan, decimals=3)
 
             # TODO: Rivedere il filtro dei punti per eliminare il pavimento
             # filtered = rounded_scan[rounded_scan[:, 7] != -3.2]
 
             df = pd.DataFrame(rounded_scan, columns=data["columns"])
-            df.to_csv(f"{sensor.name}.csv", index=False)
+            df.to_csv(csv_filename, index=False)
+
+
+def center_trajectory(trajectory):
+    x_coords = trajectory["x"]
+    y_coords = trajectory["y"]
+
+    centroid_x = np.mean(x_coords)
+    centroid_y = np.mean(y_coords)
+
+    translation_x = -centroid_x
+    translation_y = -centroid_y
+
+    x_coords_trasl = x_coords + translation_x
+    y_coords_trasl = y_coords + translation_y
+
+    trajectory["x"] = x_coords_trasl
+    trajectory["y"] = y_coords_trasl
 
 
 # * eseguire il comando "blender -P scan.py" per aprire blender e eseguire lo script
@@ -138,14 +195,23 @@ labels = vehicle_loc_rot["label"].unique()
 trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
     drop=True
 )
-trajectory_2 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[1]].reset_index(
-    drop=True
-)
+n_frame = len(trajectory_1)
+
+# trajectory_2 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[1]].reset_index(
+#     drop=True
+# )
+
+# * centro la traiettoria rispetto al sistema di riferimento dello scenario
+center_trajectory(trajectory_1)
 
 # * carico la ford thunderbird 1961 nella scena
-vehicle_1 = Vehicle("assets/ford.obj", trajectory_1, "vehicle1", "vehicle1")
-vehicle_2 = Vehicle("assets/bus.obj", trajectory_2, "vehicle2", "vehicle2")
-vehicles = [vehicle_1, vehicle_2]
+vehicle_data = [
+    ("assets/ford.obj", trajectory_1, "vehicle1", "vehicle1"),
+    # ("assets/bus.obj", trajectory_2, "vehicle2", "vehicle2")
+]
+
+vehicles = [Vehicle(*data) for data in vehicle_data]
+
 scene = Scene(vehicles)
 
 
@@ -171,4 +237,7 @@ for i in range(n_sensor):
     scene.add_sensor(sensor)
 
 scene.build()
-scene.scan()
+# esegui scene.scan() tant volte quanti sono i frame di trajectory_1
+for i in range(5):
+    scene.scan(i)
+    scene.update()
