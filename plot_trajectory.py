@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import numpy as np
 
@@ -52,8 +53,8 @@ def center_trajectory(trajectory):
 
 
 # * leggi i dati dal file csv e salva tutte le labels di riconoscimenti delle traiettorie in un array
-vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
-labels = vehicle_loc_rot["label"].unique()
+# vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
+# labels = vehicle_loc_rot["label"].unique()
 
 # * test plot_all_trajectories per plottare tutte le traiettorie
 # trajectories = {}
@@ -71,3 +72,31 @@ labels = vehicle_loc_rot["label"].unique()
 # )
 
 # center_trajectory(trajectory_1)
+
+
+def plot_3d_points(x, y, z, file_name=None):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(x, y, z, c="blue", marker=".")
+    # * rotazione di default: ax.view_init(elev=30, azim=-60)
+    # ax.view_init(elev=10, azim=180)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    if file_name is not None:
+        plt.savefig(file_name)
+    else:
+        plt.show()
+
+
+# Esempio di utilizzo
+# Supponiamo che tu abbia gli array x_points, y_points, z_points con le posizioni
+# Sostituisci questi con i tuoi dati reali
+scan = pd.read_csv("scans/csv/camera_0_0.csv")
+point_cloud = scan[["x", "y", "z"]]
+plot_3d_points(
+    point_cloud["x"],
+    point_cloud["y"],
+    point_cloud["z"],
+    file_name="plots/point_cloud.png",
+)

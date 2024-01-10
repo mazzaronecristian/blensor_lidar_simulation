@@ -5,7 +5,6 @@ assets/bus/
 scenario/
 ```
 
-scans/
 camera_*.csv
 scan_camera_*.csv
 camera_*.numpy

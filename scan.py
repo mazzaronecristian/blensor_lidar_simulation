@@ -8,7 +8,6 @@ import math
 from math import *
 import numpy as np
 import pandas as pd
-import plot_trajectory as pt
 
 # import scenario as sn
 
@@ -23,12 +22,19 @@ class Vehicle:
 
         # * posizione e direzione iniziale
         self.position = (
-            self.keyframes["x"][self.current_step],
-            self.keyframes["y"][self.current_step],
-            1.0,
+            # self.keyframes["x"][self.current_step],
+            # self.keyframes["y"][self.current_step],
+            # 0.3,
+            -22.05,
+            -29.7,
+            0.7,
         )
         # * i modelli vengono ruotati di -90 gradi attorno a x di default. Per questo motivo aggiungo 90 gradi
-        self.heading = (math.radians(90), 0, self.keyframes["heading"][0])
+        self.heading = (
+            math.radians(90),
+            0,
+            self.keyframes["heading"][self.current_step],
+        )
 
     def move(self, position, heading):
         self.position = position
@@ -91,6 +97,9 @@ class Scene:
         bpy.ops.mesh.primitive_plane_add(
             radius=10.0, location=(0, 0, 0.3), rotation=(0, 0, 0)
         )
+        bpy.context.object.name = "Plane"
+        bpy.context.object.data.name = "Plane_Data"
+        bpy.data.objects["Plane"].scale = (4, 4, 4)
         # carica tutti i veicoli nella scena
         for vehicle in self.vehicles:
             bpy.ops.import_scene.obj(filepath=vehicle.model)
@@ -147,7 +156,7 @@ class Scene:
                 rotation_speed=10.0,
                 simulation_fps=24,
                 angle_resolution=0.1728,
-                max_distance=100,
+                max_distance=150,
                 evd_file=f"{evd_filename}.numpy",
                 noise_mu=0.0,
                 noise_sigma=0.03,
@@ -163,9 +172,9 @@ class Scene:
             rounded_scan = np.round(scan, decimals=3)
 
             # TODO: Rivedere il filtro dei punti per eliminare il pavimento
-            # filtered = rounded_scan[rounded_scan[:, 7] != -3.2]
+            filtered = rounded_scan[rounded_scan[:, 7] != -3.2]
 
-            df = pd.DataFrame(rounded_scan, columns=data["columns"])
+            df = pd.DataFrame(filtered, columns=data["columns"])
             df.to_csv(csv_filename, index=False)
 
 
@@ -237,7 +246,7 @@ for i in range(n_sensor):
     scene.add_sensor(sensor)
 
 scene.build()
-# esegui scene.scan() tant volte quanti sono i frame di trajectory_1
-for i in range(5):
+
+for i in range(1):
     scene.scan(i)
     scene.update()
