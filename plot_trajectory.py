@@ -71,32 +71,61 @@ def center_trajectory(trajectory):
 #     drop=True
 # )
 
-# center_trajectory(trajectory_1)
+
+def build_sphere(radius=5, initial_pos=(0, 0, 0), traslation=(0, 0, 0)):
+    phi = np.linspace(0, np.pi, 100)
+    theta = np.linspace(0, 2 * np.pi, 100)
+    phi, theta = np.meshgrid(phi, theta)
+
+    x = radius * np.sin(phi) * np.cos(theta) + initial_pos[0] + traslation[0]
+    y = radius * np.sin(phi) * np.sin(theta) + initial_pos[1] + traslation[1]
+    z = radius * np.cos(phi) + initial_pos[2] + traslation[2]
+
+    return x, y, z
 
 
-def plot_3d_points(x, y, z, file_name=None):
+def plot_3d_points(clouds, colors, labels, file_name=None):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-    ax.scatter(x, y, z, c="blue", marker=".")
+    for i, cloud in enumerate(clouds):
+        x, y, z = cloud
+        ax.scatter(x, y, z, c=colors[i], marker=".", label=labels[i])
+    ax.set_box_aspect([1, 1, 1])
     # * rotazione di default: ax.view_init(elev=30, azim=-60)
-    # ax.view_init(elev=10, azim=180)
+    ax.view_init(elev=30, azim=-30)
+    ax.legend()
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
     if file_name is not None:
         plt.savefig(file_name)
-    else:
-        plt.show()
+    plt.show()
 
 
-# Esempio di utilizzo
-# Supponiamo che tu abbia gli array x_points, y_points, z_points con le posizioni
-# Sostituisci questi con i tuoi dati reali
-scan = pd.read_csv("scans/csv/camera_0_0.csv")
-point_cloud = scan[["x", "y", "z"]]
+scan = pd.read_csv("scan_sphere.csv")
+x1 = scan["x"]
+y1 = scan["y"]
+z1 = scan["z"]
+
+scan_trasl = pd.read_csv("scan_sphere_trasl.csv")
+x2 = scan_trasl["x"]
+y2 = scan_trasl["y"]
+z2 = scan_trasl["z"]
+
 plot_3d_points(
-    point_cloud["x"],
-    point_cloud["y"],
-    point_cloud["z"],
-    file_name="plots/point_cloud.png",
+    [(x1, y1, z1), (x2, y2, z2)],
+    colors=["blue", "red"],
+    labels=["prima della traslazione", "dopo la traslazione"],
+    file_name="scan_sphere.png",
 )
+
+
+x, y, z = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, 0, 0))
+x1, y1, z1 = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, -2, 1))
+plot_3d_points(
+    [(x, y, z), (x1, y1, z1)],
+    colors=["blue", "red"],
+    labels=["prima della traslazione", "dopo la traslazione"],
+    file_name="sphere.png",
+)
+# plot_sphere(radius=2, traslation=(0, 0, 0))

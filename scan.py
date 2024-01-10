@@ -22,12 +22,9 @@ class Vehicle:
 
         # * posizione e direzione iniziale
         self.position = (
-            # self.keyframes["x"][self.current_step],
-            # self.keyframes["y"][self.current_step],
-            # 0.3,
-            -22.05,
-            -29.7,
-            0.7,
+            self.keyframes["x"][self.current_step],
+            self.keyframes["y"][self.current_step],
+            0.3,
         )
         # * i modelli vengono ruotati di -90 gradi attorno a x di default. Per questo motivo aggiungo 90 gradi
         self.heading = (
@@ -73,11 +70,6 @@ class Scene:
     def __init__(self, vehicles=[], sensors=[]):
         self.vehicles = vehicles
         self.sensors = sensors
-
-        bpy.ops.mesh.primitive_plane_add(
-            radius=10.0, location=(0, 0, 0.3), rotation=(0, 0, 0)
-        )
-        self.plane = bpy.data.objects["Plane"]
 
     def add_vehicle(self, vehicle):
         self.vehicles.append(vehicle)
