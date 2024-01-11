@@ -163,8 +163,13 @@ class Scene:
             scan = np.loadtxt(evd_filename)
             rounded_scan = np.round(scan, decimals=3)
 
-            # TODO: Rivedere il filtro dei punti per eliminare il pavimento
-            filtered = rounded_scan[rounded_scan[:, 7] != -3.2]
+            # * filtro i dati per eliminare la "strada"
+            pavement = bpy.data.objects["Plane"].location.z
+            height = current_sensor.location.z
+
+            filtered = rounded_scan[
+                rounded_scan[:, 7] != np.round(pavement - height, decimals=3)
+            ]
 
             df = pd.DataFrame(filtered, columns=data["columns"])
             df.to_csv(csv_filename, index=False)
@@ -239,6 +244,6 @@ for i in range(n_sensor):
 
 scene.build()
 
-for i in range(1):
+for i in range(n_frame):
     scene.scan(i)
     scene.update()
