@@ -5,6 +5,8 @@ assets/bus/
 scenario/
 ```
 *.csv
+!vehicle_keyframes.csv
+!sensor_keyframes.csv
 *.numpy
 *.png
 camera_*.csv

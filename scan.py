@@ -195,24 +195,27 @@ def center_trajectory(trajectory):
 # * eseguire il comando "blender -P scan.py" per aprire blender e eseguire lo script
 # * eseguire il comando "blender -b -P scan.py" per eseguire lo script in background
 
-vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
+vehicle_loc_rot = pd.read_csv("vehicle_trajectories.csv")
 labels = vehicle_loc_rot["label"].unique()
 
-trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
+trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_3"].reset_index(
     drop=True
 )
-n_frame = len(trajectory_1)
+# trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
+#     drop=True
+# )
+n_frame = len(trajectory)
 
 # trajectory_2 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[1]].reset_index(
 #     drop=True
 # )
 
 # * centro la traiettoria rispetto al sistema di riferimento dello scenario
-center_trajectory(trajectory_1)
+center_trajectory(trajectory)
 
 # * carico la ford thunderbird 1961 nella scena
 vehicle_data = [
-    ("assets/ford.obj", trajectory_1, "vehicle1", "vehicle1"),
+    ("assets/ford.obj", trajectory, "vehicle1", "vehicle1"),
     # ("assets/bus.obj", trajectory_2, "vehicle2", "vehicle2")
 ]
 
@@ -244,6 +247,6 @@ for i in range(n_sensor):
 
 scene.build()
 
-for i in range(n_frame):
+for i in range(0):
     scene.scan(i)
     scene.update()
