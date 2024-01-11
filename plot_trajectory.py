@@ -4,12 +4,6 @@ import pandas as pd
 import numpy as np
 
 
-# trajectories: dictionary of pandas dataframes
-# trajectories = {
-#     "label1": pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]}),
-#     "label2": pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]}),
-#     ...}
-# plot all trajectories in the dictionary
 def plot_all_trajectories(trajectories):
     # * plot all trajectories
     for label in trajectories:
@@ -21,15 +15,30 @@ def plot_all_trajectories(trajectories):
     plt.show()
 
 
-# trajectory: pandas dataframe like pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
-# name: string (name of the trajectory)
-# plot trajectory
 def plot_trajectory(trajectory, name):
     # * plot trajectory
     plt.plot(trajectory["x"], trajectory["y"], label=name)
     plt.xlabel("x")
     plt.ylabel("y")
     plt.legend()
+    plt.show()
+
+
+def plot_3d_points(clouds, colors, labels, file_name=None):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    for i, cloud in enumerate(clouds):
+        x, y, z = cloud
+        ax.scatter(x, y, z, c=colors[i], marker=".", label=labels[i])
+    ax.set_box_aspect([1, 1, 1])
+    # * rotazione di default: ax.view_init(elev=30, azim=-60)
+    ax.view_init(elev=30, azim=-30)
+    ax.legend()
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    if file_name is not None:
+        plt.savefig(file_name)
     plt.show()
 
 
@@ -52,6 +61,18 @@ def center_trajectory(trajectory):
     plot_trajectory(trajectory, "Trajectory traslata")
 
 
+def build_sphere(radius=5, initial_pos=(0, 0, 0), traslation=(0, 0, 0)):
+    phi = np.linspace(0, np.pi, 100)
+    theta = np.linspace(0, 2 * np.pi, 100)
+    phi, theta = np.meshgrid(phi, theta)
+
+    x = radius * np.sin(phi) * np.cos(theta) + initial_pos[0] + traslation[0]
+    y = radius * np.sin(phi) * np.sin(theta) + initial_pos[1] + traslation[1]
+    z = radius * np.cos(phi) + initial_pos[2] + traslation[2]
+
+    return x, y, z
+
+
 # * leggi i dati dal file csv e salva tutte le labels di riconoscimenti delle traiettorie in un array
 # vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
 # labels = vehicle_loc_rot["label"].unique()
@@ -65,41 +86,6 @@ def center_trajectory(trajectory):
 #     trajectories[label] = trajectory
 # print(trajectories)
 # plot_all_trajectories(trajectories)
-
-# * Test center_trajectory per traslare una traiettoria nel centro del sistema di riferimento
-# trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
-#     drop=True
-# )
-
-
-def build_sphere(radius=5, initial_pos=(0, 0, 0), traslation=(0, 0, 0)):
-    phi = np.linspace(0, np.pi, 100)
-    theta = np.linspace(0, 2 * np.pi, 100)
-    phi, theta = np.meshgrid(phi, theta)
-
-    x = radius * np.sin(phi) * np.cos(theta) + initial_pos[0] + traslation[0]
-    y = radius * np.sin(phi) * np.sin(theta) + initial_pos[1] + traslation[1]
-    z = radius * np.cos(phi) + initial_pos[2] + traslation[2]
-
-    return x, y, z
-
-
-def plot_3d_points(clouds, colors, labels, file_name=None):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
-    for i, cloud in enumerate(clouds):
-        x, y, z = cloud
-        ax.scatter(x, y, z, c=colors[i], marker=".", label=labels[i])
-    ax.set_box_aspect([1, 1, 1])
-    # * rotazione di default: ax.view_init(elev=30, azim=-60)
-    ax.view_init(elev=30, azim=-30)
-    ax.legend()
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-    if file_name is not None:
-        plt.savefig(file_name)
-    plt.show()
 
 
 scan = pd.read_csv("scan_sphere.csv")
@@ -120,12 +106,11 @@ plot_3d_points(
 )
 
 
-x, y, z = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, 0, 0))
-x1, y1, z1 = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, -2, 1))
+x1, y1, z1 = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, 0, 0))
+x2, y2, z2 = build_sphere(radius=2, initial_pos=(0, 6, -7), traslation=(0, -2, 1))
 plot_3d_points(
-    [(x, y, z), (x1, y1, z1)],
+    [(x1, y1, z1), (x2, y2, z2)],
     colors=["blue", "red"],
     labels=["prima della traslazione", "dopo la traslazione"],
     file_name="sphere.png",
 )
-# plot_sphere(radius=2, traslation=(0, 0, 0))

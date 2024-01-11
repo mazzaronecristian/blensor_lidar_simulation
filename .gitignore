@@ -4,7 +4,9 @@ assets/road/
 assets/bus/
 scenario/
 ```
-
+*.csv
+*.numpy
+*.png
 camera_*.csv
 scan_camera_*.csv
 camera_*.numpy
