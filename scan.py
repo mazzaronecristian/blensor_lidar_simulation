@@ -199,7 +199,7 @@ def center_trajectory(trajectory):
 vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
 labels = vehicle_loc_rot["label"].unique()
 
-trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_3"].reset_index(
+trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_1"].reset_index(
     drop=True
 )
 # trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
@@ -232,7 +232,6 @@ min_y = abs(min(min(vehicle.keyframes["y"]) for vehicle in vehicles))
 max_y = abs(max(max(vehicle.keyframes["y"]) for vehicle in vehicles))
 
 sensor_distance = np.ceil(max(min_x, max_x, min_y, max_y))
-print(sensor_distance)
 sensor_loc_rot = pd.read_csv("sensor_keyframes.csv")
 # Crea e posiziona i sensori intorno al centro del quadrato
 for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
@@ -275,6 +274,6 @@ for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
 
 scene.build()
 
-for i in range(5):
+for i in range(n_frame):
     scene.scan(i)
     scene.update()
