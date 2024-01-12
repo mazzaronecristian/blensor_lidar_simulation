@@ -176,23 +176,6 @@ class Scene:
             df.to_csv(csv_filename, index=False)
 
 
-def center_trajectory(trajectory):
-    x_coords = trajectory["x"]
-    y_coords = trajectory["y"]
-
-    centroid_x = np.mean(x_coords)
-    centroid_y = np.mean(y_coords)
-
-    translation_x = -centroid_x
-    translation_y = -centroid_y
-
-    x_coords_trasl = x_coords + translation_x
-    y_coords_trasl = y_coords + translation_y
-
-    trajectory["x"] = x_coords_trasl
-    trajectory["y"] = y_coords_trasl
-
-
 # * eseguire il comando "blender -P scan.py" per aprire blender e eseguire lo script
 # * eseguire il comando "blender -b -P scan.py" per eseguire lo script in background
 
@@ -202,24 +185,13 @@ labels = vehicle_loc_rot["label"].unique()
 trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_1"].reset_index(
     drop=True
 )
-# trajectory_1 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[0]].reset_index(
-#     drop=True
-# )
 n_frame = len(trajectory)
-
-# trajectory_2 = vehicle_loc_rot[vehicle_loc_rot["label"] == labels[1]].reset_index(
-#     drop=True
-# )
-
-# * centro la traiettoria rispetto al sistema di riferimento dello scenario
-# center_trajectory(trajectory)
 
 # * carico la ford thunderbird 1961 nella scena
 vehicle_data = [
     ("assets/ford.obj", trajectory, "vehicle1", "vehicle1"),
-    # ("assets/bus.obj", trajectory_2, "vehicle2", "vehicle2")
+    # aggiungi tutti i veicoli della scena a questo array
 ]
-
 vehicles = [Vehicle(*data) for data in vehicle_data]
 
 scene = Scene(vehicles)
