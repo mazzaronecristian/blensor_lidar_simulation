@@ -8,6 +8,7 @@ import math
 from math import *
 import numpy as np
 import pandas as pd
+from itertools import product
 
 # import scenario as sn
 
@@ -91,7 +92,7 @@ class Scene:
         )
         bpy.context.object.name = "Plane"
         bpy.context.object.data.name = "Plane_Data"
-        bpy.data.objects["Plane"].scale = (4, 4, 4)
+        bpy.data.objects["Plane"].scale = (10, 10, 10)
         # carica tutti i veicoli nella scena
         for vehicle in self.vehicles:
             bpy.ops.import_scene.obj(filepath=vehicle.model)
@@ -152,8 +153,8 @@ class Scene:
                 evd_file=f"{evd_filename}.numpy",
                 noise_mu=0.0,
                 noise_sigma=0.03,
-                start_angle=-90.0,
-                end_angle=90.0,
+                start_angle=0,
+                end_angle=360,
                 evd_last_scan=True,
                 add_blender_mesh=False,
                 add_noisy_blender_mesh=False,
@@ -195,7 +196,7 @@ def center_trajectory(trajectory):
 # * eseguire il comando "blender -P scan.py" per aprire blender e eseguire lo script
 # * eseguire il comando "blender -b -P scan.py" per eseguire lo script in background
 
-vehicle_loc_rot = pd.read_csv("vehicle_trajectories.csv")
+vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
 labels = vehicle_loc_rot["label"].unique()
 
 trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_3"].reset_index(
@@ -211,7 +212,7 @@ n_frame = len(trajectory)
 # )
 
 # * centro la traiettoria rispetto al sistema di riferimento dello scenario
-center_trajectory(trajectory)
+# center_trajectory(trajectory)
 
 # * carico la ford thunderbird 1961 nella scena
 vehicle_data = [
@@ -224,29 +225,56 @@ vehicles = [Vehicle(*data) for data in vehicle_data]
 scene = Scene(vehicles)
 
 
-sensor_loc_rot = pd.read_csv("sensor_keyframes.csv")
-n_sensor = len(sensor_loc_rot)
+# * Calcola i limiti delle traiettorie
+min_x = abs(min(min(vehicle.keyframes["x"]) for vehicle in vehicles))
+max_x = abs(max(max(vehicle.keyframes["x"]) for vehicle in vehicles))
+min_y = abs(min(min(vehicle.keyframes["y"]) for vehicle in vehicles))
+max_y = abs(max(max(vehicle.keyframes["y"]) for vehicle in vehicles))
 
-for i in range(n_sensor):
+sensor_distance = np.ceil(max(min_x, max_x, min_y, max_y))
+print(sensor_distance)
+sensor_loc_rot = pd.read_csv("sensor_keyframes.csv")
+# Crea e posiziona i sensori intorno al centro del quadrato
+for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
+    sensor_x = dx * sensor_distance / 2
+    sensor_y = dy * sensor_distance / 2
+    sensor_heading = None
+    if sensor_x < 0:
+        sensor_heading = (math.radians(90), 0, math.radians(-90))
+    else:
+        sensor_heading = (math.radians(90), 0, math.radians(90))
+
     sensor = Sensor(
-        position=(
-            sensor_loc_rot["x"][i],
-            sensor_loc_rot["y"][i],
-            sensor_loc_rot["z"][i],
-        ),
-        heading=(
-            math.radians(sensor_loc_rot["x_rotation"][i]),
-            math.radians(sensor_loc_rot["y_rotation"][i]),
-            math.radians(sensor_loc_rot["z_rotation"][i]),
-        ),
+        position=(sensor_x, sensor_y, 3.5),
+        heading=sensor_heading,  # Impostare l'orientamento desiderato
         keyframes=sensor_loc_rot,
         name=f"camera_{i}",
         data=f"scan_camera_{i}.csv",
     )
     scene.add_sensor(sensor)
 
+# n_sensor = len(sensor_loc_rot)
+#
+# for i in range(n_sensor):
+#     sensor = Sensor(
+#         position=(
+#             sensor_loc_rot["x"][i],
+#             sensor_loc_rot["y"][i],
+#             sensor_loc_rot["z"][i],
+#         ),
+#         heading=(
+#             math.radians(sensor_loc_rot["x_rotation"][i]),
+#             math.radians(sensor_loc_rot["y_rotation"][i]),
+#             math.radians(sensor_loc_rot["z_rotation"][i]),
+#         ),
+#         keyframes=sensor_loc_rot,
+#         name=f"camera_{i}",
+#         data=f"scan_camera_{i}.csv",
+#     )
+#     scene.add_sensor(sensor)
+
 scene.build()
 
-for i in range(0):
+for i in range(5):
     scene.scan(i)
     scene.update()
