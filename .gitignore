@@ -4,6 +4,7 @@ assets/road/
 assets/bus/
 scenario/
 ```
+atan.py
 *.csv
 !vehicle_keyframes.csv
 !sensor_keyframes.csv
