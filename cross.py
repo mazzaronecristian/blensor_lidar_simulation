@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 import math
 
-# TODO: script per la creazione simulazione con veicoli e sensori (solidali ai veicoli) e traiettorie 1 e 3
-trajecoties = pd.read_csv("vehicle_keyframes.csv")
+trajecoties = pd.read_csv("cross_trajectories.csv")
 
 labels = trajecoties["label"].unique()
 
@@ -61,6 +60,6 @@ scene.build()
 
 # * n_frame è uguale al numero di frame della traiettoria più corta
 n_frame = min(len(trajectory_1), len(trajectory_3))
-for i in range(10):
+for i in range(n_frame):
     scene.scan(i)
     scene.update()
