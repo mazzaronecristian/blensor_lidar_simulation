@@ -23,7 +23,7 @@ sensor_ford = sn.Sensor(
     heading=(
         math.radians(90),
         0,
-        trajectory_1["heading"][0],
+        math.radians(-90) + trajectory_1["heading"][0],
     ),
     name="camera_ford",
     data="scan_camera_ford.csv",
@@ -34,7 +34,7 @@ sensor_autobus = sn.Sensor(
     heading=(
         math.radians(90),
         0,
-        trajectory_3["heading"][0],
+        math.radians(-90) + trajectory_3["heading"][0],
     ),
     name="camera_autobus",
     data="scan_camera_autobus.csv",
@@ -56,4 +56,11 @@ vehicles_data = [
 ]
 vehicles = [sn.Vehicle(*data) for data in vehicles_data]
 
-scene = sn.Scene(vehicles)
+scene = sn.Scene(vehicles, sensors=[sensor_ford, sensor_autobus])
+scene.build()
+
+# * n_frame è uguale al numero di frame della traiettoria più corta
+n_frame = min(len(trajectory_1), len(trajectory_3))
+for i in range(10):
+    scene.scan(i)
+    scene.update()
