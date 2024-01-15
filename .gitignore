@@ -2,7 +2,6 @@ __pycache__/
 assets/barrier/
 assets/road/
 assets/bus/
-scenario/
 ```
 atan.py
 *.csv
