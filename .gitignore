@@ -2,6 +2,7 @@ __pycache__/
 assets/barrier/
 assets/road/
 assets/bus/
+Tesi.code-workspace
 ```
 atan.py
 *.csv

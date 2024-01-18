@@ -1,6 +1,5 @@
 import scenario as sn
 import pandas as pd
-import numpy as np
 import math
 
 trajecoties = pd.read_csv("cross_trajectories.csv")
@@ -29,7 +28,7 @@ sensor_ford = sn.Sensor(
 )
 
 sensor_autobus = sn.Sensor(
-    position=(trajectory_3["x"][0], trajectory_3["y"][0], 3.5),
+    position=(trajectory_3["x"][0], trajectory_3["y"][0], 6),
     heading=(
         math.radians(90),
         0,
