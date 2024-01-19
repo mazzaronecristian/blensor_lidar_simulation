@@ -8,18 +8,22 @@ from itertools import product
 import sys
 
 args = sys.argv
+args = args[args.index("--") + 1 :]  # get all args after "--"
 
-if len(args) < 5:
+if len(args) < 2 and args[-1] != "h":
     print("Numero di argomenti non valido")
     exit(1)
-if args[-1] == "--h":
-    print("blender [-b] -P scan.py <csv_file> <label>")
+if args[-1] == "h":
+    print("blender [-b] -P scan.py -- <csv_file> <label>")
     print(
         "Esegue la simulazione con una data traiettoria; salva i file csv risultanti nella cartella './scans/csv'"
     )
-    print("csv_file: file csv contenente la traiettoria")
-    print("label: label della traiettoria")
-    print("-b: esegue lo script in background")
+    print(
+        "--:            Blender ignora tutti gli argomenti dopo => inserire gli argomenti dello script PYTHON dopo --"
+    )
+    print("csv_file:    file csv contenente la traiettoria")
+    print("label:       label della traiettoria")
+    print("-b:          esegue lo script in background")
     print("-P --python: esegue lo script Python")
     exit(0)
 
@@ -70,6 +74,6 @@ for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
 
 scene.build()
 
-for i in range(1):
+for i in range(0):
     scene.scan(i)
     scene.update()
