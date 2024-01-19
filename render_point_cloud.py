@@ -18,7 +18,7 @@ if args[-1] == "h":
         "Esegue il rendering delle nuvole di punti presenti nella cartella <ply_file_directory> e salva le immagini nella cartella <destination> in formato PNG"
     )
     print(
-        "--:                    Blender ignora tutti gli argomenti dopo => inserire gli argomenti dello script PYTHON dopo --"
+        "--:                  Blender ignora tutti gli argomenti dopo => inserire gli argomenti dello script PYTHON dopo --"
     )
     print("ply_file_directory:  cartella contenente i file .ply")
     print("destination:         cartella in cui salvare le immagini in formato PNG")

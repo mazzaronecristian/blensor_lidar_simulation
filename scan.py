@@ -19,7 +19,7 @@ if args[-1] == "h":
         "Esegue la simulazione con una data traiettoria; salva i file csv risultanti nella cartella './scans/csv'"
     )
     print(
-        "--:            Blender ignora tutti gli argomenti dopo => inserire gli argomenti dello script PYTHON dopo --"
+        "--:          Blender ignora tutti gli argomenti dopo => inserire gli argomenti dello script PYTHON dopo --"
     )
     print("csv_file:    file csv contenente la traiettoria")
     print("label:       label della traiettoria")
@@ -53,7 +53,6 @@ min_y = abs(min(min(vehicle.keyframes["y"]) for vehicle in vehicles))
 max_y = abs(max(max(vehicle.keyframes["y"]) for vehicle in vehicles))
 
 sensor_distance = np.ceil(max(min_x, max_x, min_y, max_y))
-sensor_loc_rot = pd.read_csv("sensor_keyframes.csv")
 # Crea e posiziona i sensori intorno al centro del quadrato
 for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
     sensor_x = dx * sensor_distance / 2
@@ -74,6 +73,6 @@ for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
 
 scene.build()
 
-for i in range(0):
+for i in range(n_frame):
     scene.scan(i)
     scene.update()
