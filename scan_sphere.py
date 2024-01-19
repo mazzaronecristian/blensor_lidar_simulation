@@ -9,6 +9,7 @@ from math import *
 import numpy as np
 import pandas as pd
 
+
 with open("data.json", "r") as file:
     data = json.load(file)
 

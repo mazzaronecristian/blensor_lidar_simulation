@@ -4,15 +4,33 @@ import numpy as np
 import pandas as pd
 from itertools import product
 
-# * eseguire il comando "blender -P scan.py" per aprire blender e eseguire lo script
-# * eseguire il comando "blender -b -P scan.py" per eseguire lo script in background
+# * parsing argomenti e documentazione
+import sys
 
-vehicle_loc_rot = pd.read_csv("vehicle_keyframes.csv")
+args = sys.argv
+
+if len(args) < 5:
+    print("Numero di argomenti non valido")
+    exit(1)
+if args[-1] == "--h":
+    print("blender [-b] -P scan.py <csv_file> <label>")
+    print(
+        "Esegue la simulazione con una data traiettoria; salva i file csv risultanti nella cartella './scans/csv'"
+    )
+    print("csv_file: file csv contenente la traiettoria")
+    print("label: label della traiettoria")
+    print("-b: esegue lo script in background")
+    print("-P --python: esegue lo script Python")
+    exit(0)
+
+csv_file = args[-2].replace("\\", "/")
+label = args[-1].replace("\\", "/")
+
+vehicle_loc_rot = pd.read_csv(f"{csv_file}")
 labels = vehicle_loc_rot["label"].unique()
 
-trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == "Trajectory_1"].reset_index(
-    drop=True
-)
+trajectory = vehicle_loc_rot[vehicle_loc_rot["label"] == label].reset_index(drop=True)
+print(trajectory)
 n_frame = len(trajectory)
 
 # * carico la ford thunderbird 1961 nella scena
@@ -23,7 +41,6 @@ vehicle_data = [
 vehicles = [sn.Vehicle(*data) for data in vehicle_data]
 
 scene = sn.Scene(vehicles)
-
 
 # * Calcola i limiti delle traiettorie
 min_x = abs(min(min(vehicle.keyframes["x"]) for vehicle in vehicles))
@@ -53,6 +70,6 @@ for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
 
 scene.build()
 
-for i in range(n_frame):
+for i in range(1):
     scene.scan(i)
     scene.update()
