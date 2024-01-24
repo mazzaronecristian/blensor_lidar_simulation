@@ -15,4 +15,5 @@ scan_camera_*.csv
 camera_*.numpy
 create_csv.py
 analize.py
+Argoverse/
 ```

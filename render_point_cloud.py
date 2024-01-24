@@ -63,14 +63,61 @@ render_camera.data.name = f"{render_camera.name}_Data"
 bpy.context.scene.camera = render_camera
 
 # * carico la nuvola di punti come .ply (Stanford Polygon Library)
-for i, path in enumerate(point_clouds):
-    bpy.ops.import_mesh.ply(filepath=path)
-    point_cloud = bpy.context.selected_objects[0]
-    point_cloud.location = (0, 0, 0)
-    point_cloud.rotation_euler = (0, 0, 0)
-    point_cloud.name = f"point_cloud_{i}"
+# for i, path in enumerate(point_clouds):
+bpy.ops.import_mesh.ply(filepath="scans/ply/trajectory_1/camera_3_44.ply")
+print(bpy.data.objects[0])
+print(bpy.data.objects[1])
+point_cloud = bpy.data.objects["point_cloud"]
+point_cloud.location = (10, 0, 0)
+point_cloud.rotation_euler = (0, 0, 0)
+point_cloud.name = f"point_cloud_"
+# exit()
 
-    exit()
+
+# TODO: refactoring in classi
+class Point_cloud:
+    def __init__(self, path):
+        self.path = path
+        self.name = os.path.basename(path)
+        self.point_cloud = None
+
+    def load(self):
+        bpy.ops.import_mesh.ply(filepath=self.path)
+        self.point_cloud = bpy.context.selected_objects[0]
+        self.point_cloud.location = (0, 0, 0)
+        self.point_cloud.rotation_euler = (0, 0, 0)
+        self.point_cloud.name = self.name
+
+    def extrude_and_materailize(self):
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.mesh.extrude_region_move()
+        mat = bpy.data.materials.new(name="Material")
+        mat.type = "WIRE"
+        mat.emit = 10
+        self.point_cloud.data.materials.append(mat)
+        bpy.ops.object.editmode_toggle()
+
+    def delete(self):
+        bpy.ops.object.select_all(action="SELECT")
+        bpy.ops.object.delete()
+
+
+class Render_Scene:
+    def __init__(self, camera, point_cloud):
+        self.point_cloud = point_cloud
+
+        bpy.ops.object.camera_add(location=camera.position, rotation=camera.heading)
+        self.render_camera = bpy.context.object
+        self.render_camera.name = "camera"
+        render_camera.data.name = f"{render_camera.name}_Data"
+        bpy.context.scene.camera = render_camera
+
+    def render(self, path):
+        bpy.context.scene.render.filepath = path
+        bpy.context.scene.render.image_settings.file_format = "PNG"
+        bpy.ops.render.render(use_viewport=True, write_still=True)
+
+
 # ? vecchio codice, prendere spunto per il nuovo
 # bpy.ops.import_mesh.ply(filepath="output.ply")
 # point_cloud = bpy.context.selected_objects[0]
