@@ -54,6 +54,8 @@ class Vehicle:
             0,
             self.keyframes["heading"][self.current_step],
         )
+        if self.sensors == []:
+            return
         for i in range(len(self.sensors)):
             self.sensors[i].move(
                 position=(
@@ -129,15 +131,16 @@ class Scene:
             car_object = bpy.data.objects[vehicle.name]
             car_object.location = vehicle.position
             car_object.rotation_euler = vehicle.heading
-            for sensor in vehicle.sensors:
-                current_sensor = bpy.data.objects[sensor.name]
-                current_sensor.location = sensor.position
-                current_sensor.rotation_euler = sensor.heading
+            if vehicle.sensors != []:
+                for sensor in vehicle.sensors:
+                    current_sensor = bpy.data.objects[sensor.name]
+                    current_sensor.location = sensor.position
+                    current_sensor.rotation_euler = sensor.heading
 
     # esegui un refactoring del codice per eliminare la ripetizione di codice
 
     # * esegue una scansione e salva i dati in scans/csv/{sensor.name}_{i}.csv e scans/numpy/{sensor.name}_{i}.numpy
-    def scan(self, i=None):
+    def scan(self, i=None, filter=False):
         with open("data.json", "r") as file:
             data = json.load(file)
 
@@ -186,9 +189,16 @@ class Scene:
             pavement = bpy.data.objects["Plane"].location.z
             height = current_sensor.location.z
 
-            filtered = rounded_scan[
-                rounded_scan[:, 7] != np.round(pavement - height, decimals=3)
-            ]
+            if filter:
+                rounded_scan = rounded_scan[
+                    rounded_scan[:, 7] != np.round(pavement - height, decimals=3)
+                ]
 
-            df = pd.DataFrame(filtered, columns=data["columns"])
+            df = pd.DataFrame(rounded_scan, columns=data["columns"])
             df.to_csv(csv_filename, index=False)
+
+
+def filter_pavement(point_cloud, pavement_height, sensor_height):
+    return point_cloud[
+        point_cloud[:, 7] != np.round(pavement_height - sensor_height, decimals=3)
+    ]
