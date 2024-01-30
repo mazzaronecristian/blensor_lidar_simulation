@@ -1,6 +1,4 @@
 import bpy
-from bpy import data as D
-from bpy import context as C
 import blensor
 import json
 from mathutils import *
@@ -56,19 +54,21 @@ class Vehicle:
         )
         if self.sensors == []:
             return
-        for i in range(len(self.sensors)):
-            self.sensors[i].move(
-                position=(
-                    self.keyframes["x"][self.current_step],
-                    self.keyframes["y"][self.current_step],
-                    self.sensors[i].position[2],
-                ),
-                heading=(
-                    math.radians(90),
-                    0,
-                    math.radians(-90) + self.keyframes["heading"][self.current_step],
-                ),
-            )
+        for sensor in self.sensors:
+            if hasattr(sensor, "move") and callable(getattr(sensor, "move")):
+                sensor.move(
+                    position=(
+                        self.keyframes["x"][self.current_step],
+                        self.keyframes["y"][self.current_step],
+                        sensor.position[2],
+                    ),
+                    heading=(
+                        math.radians(90),
+                        0,
+                        math.radians(-90)
+                        + self.keyframes["heading"][self.current_step],
+                    ),
+                )
 
 
 class Sensor:
@@ -131,8 +131,12 @@ class Scene:
             car_object = bpy.data.objects[vehicle.name]
             car_object.location = vehicle.position
             car_object.rotation_euler = vehicle.heading
-            if vehicle.sensors != []:
-                for sensor in vehicle.sensors:
+            for sensor in vehicle.sensors:
+                if (
+                    hasattr(sensor, "name")
+                    and hasattr(sensor, "position")
+                    and hasattr(sensor, "heading")
+                ):
                     current_sensor = bpy.data.objects[sensor.name]
                     current_sensor.location = sensor.position
                     current_sensor.rotation_euler = sensor.heading
