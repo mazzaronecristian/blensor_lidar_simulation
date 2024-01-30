@@ -30,6 +30,8 @@ class Vehicle:
             self.keyframes["heading"][self.current_step],
         )
 
+    def add_sensor(self, sensor):
+        self.sensors.append(sensor)
     def move(self, position, heading):
         self.position = position
         self.heading = heading
