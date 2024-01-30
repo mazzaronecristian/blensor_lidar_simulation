@@ -3,7 +3,7 @@ import math
 import os
 import re
 
-# TODO: esegui rednering delle nuvole di punti date in input
+# TODO: esegui rendering delle nuvole di punti date in input
 import sys
 
 args = sys.argv
