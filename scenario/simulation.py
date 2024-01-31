@@ -42,6 +42,8 @@ class Vehicle:
 
     def move(self):
         self.current_step += 1
+        if self.current_step >= len(self.keyframes["x"]):
+            return
         self.position = (
             self.keyframes["x"][self.current_step],
             self.keyframes["y"][self.current_step],
