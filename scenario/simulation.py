@@ -9,12 +9,6 @@ import pandas as pd
 
 # import scenario as sn
 
-# TODO: Restore di tutte le modifiche che sono andate perse
-# TODO: fix dell'update dei sensori su veicoli (se un veicolo non ha sensori, l'update si blocca)
-# TODO: funzione per filtrare le nuvole di punti e aggiungere flag "filter" alla funziona Scene.scan()
-# ? manca qualcosa?
-
-
 class Vehicle:
     def __init__(self, model, keyframes, name, sensors=[]):
         self.model = model
