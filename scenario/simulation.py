@@ -80,9 +80,11 @@ class Sensor:
 
 
 class Scene:
-    def __init__(self, vehicles=[], sensors=[]):
+    def __init__(self, vehicles=[], sensors=[], center = {"x": 0, "y": 0, "z": 0}):
         self.vehicles = vehicles
         self.sensors = sensors
+        self.center = center
+        self.center["z"] += 0.3
 
     def add_vehicle(self, vehicle):
         self.vehicles.append(vehicle)
@@ -100,7 +102,7 @@ class Scene:
 
         # * carico un pavimento di prova
         bpy.ops.mesh.primitive_plane_add(
-            radius=10.0, location=(0, 0, 0.3), rotation=(0, 0, 0)
+            radius=10.0, location=(self.center["x"],self.center["y"],self.center["z"] ), rotation=(0, 0, 0)
         )
         bpy.context.object.name = "Plane"
         bpy.context.object.data.name = "Plane_Data"
