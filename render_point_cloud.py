@@ -2,7 +2,7 @@ import bpy
 import math
 import os
 import re
-
+import pandas as pd
 # TODO: esegui rendering delle nuvole di punti date in input
 import sys
 
@@ -36,6 +36,18 @@ def extract_sort_key(nome_file):
     # Converte i numeri estratti in interi
     return [int(numero) for numero in numeri]
 
+def load_cameras(sensor_name, camera_details):
+    cameras = camera_details.get_group(sensor_name)
+    render_cameras = []
+    for i, camera in cameras.iterrows():
+        bpy.ops.object.camera_add(location=(camera["x"],camera["y"],camera["z"]), 
+                                rotation=(math.radians(camera["x_rotation"]), math.radians(camera["y_rotation"]), math.radians(camera["z_rotation"])))
+        render_camera = bpy.context.object
+        render_camera.name = camera["name"]
+        render_camera.data.name = f"{render_camera.name}_Data"
+        render_camera.data.lens = camera["lens"]
+        render_cameras.append(render_camera)
+    return render_cameras
 
 # * Ottieni la lista dei file nella cartella ordinati nel modo giusto
 lista_file = sorted(os.listdir(origin), key=extract_sort_key)
@@ -47,76 +59,71 @@ for file in lista_file:
     if file.endswith(".ply"):
         point_clouds.append(complete_path)
 
-
-# * pulisce la scena
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete()
-
 # * aggiungo un punto luce
 bpy.ops.object.lamp_add(type="POINT", location=(0, 4, 5))
 
 # * carico la camera di riferimento per il rendering
-bpy.ops.object.camera_add(location=(0, 0, 0), rotation=(math.radians(80), 0, 0))
-render_camera = bpy.context.object
-render_camera.name = "camera"
-render_camera.data.name = f"{render_camera.name}_Data"
-bpy.context.scene.camera = render_camera
+# bpy.ops.object.camera_add(location=(0, 0, 2), 
+#                           rotation=(math.radians(90), 0, math.radians(220)))
+# render_camera = bpy.context.object
+# render_camera.name = "camera"
+# render_camera.data.name = f"{render_camera.name}_Data"
+# render_camera.data.lens = 15
+# bpy.context.scene.camera = render_camera
+
+#* genero il materiale di tipo wire da assegnare alla nuvola di punti
+mat = bpy.data.materials.new(name="Material")
+mat.type = "WIRE"
+mat.emit = 10
+substrings = os.path.basename(point_clouds[0]).split(".")[0].split("_")
+ 
+latest_sensor = None
+
+camera_details = pd.read_csv("camera_details.csv")
+camera_details = camera_details.groupby("target_sensor")
+
 
 # * carico la nuvola di punti come .ply (Stanford Polygon Library)
-# for i, path in enumerate(point_clouds):
-bpy.ops.import_mesh.ply(filepath="scans/ply/trajectory_1/camera_3_44.ply")
-print(bpy.data.objects[0])
-print(bpy.data.objects[1])
-point_cloud = bpy.data.objects["point_cloud"]
-point_cloud.location = (10, 0, 0)
-point_cloud.rotation_euler = (0, 0, 0)
-point_cloud.name = f"point_cloud_"
-# exit()
+for i, path in enumerate(point_clouds[0:5]):
+    #* Carico la nuvola e ottengo current_sensor
+    bpy.ops.import_mesh.ply(filepath="scans/ply/real_trajs/sensor_2_4.ply")
+    #*edita la nuvola di punti e vi assegna il materiale wire
+    break
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.extrude_region_move()
+    bpy.context.object.data.materials.append(mat)
+    bpy.ops.object.editmode_toggle()
+    point_cloud_name = bpy.context.object.name
+    substrings = point_cloud_name.split("_")
+    current_sensor = substrings[0]+"_"+substrings[1]
+    if latest_sensor == None:
+        render_cameras = load_cameras(current_sensor, camera_details)
 
-
-# TODO: refactoring in classi
-class Point_cloud:
-    def __init__(self, path):
-        self.path = path
-        self.name = os.path.basename(path)
-        self.point_cloud = None
-
-    def load(self):
-        bpy.ops.import_mesh.ply(filepath=self.path)
-        self.point_cloud = bpy.context.selected_objects[0]
-        self.point_cloud.location = (0, 0, 0)
-        self.point_cloud.rotation_euler = (0, 0, 0)
-        self.point_cloud.name = self.name
-
-    def extrude_and_materailize(self):
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.mesh.extrude_region_move()
-        mat = bpy.data.materials.new(name="Material")
-        mat.type = "WIRE"
-        mat.emit = 10
-        self.point_cloud.data.materials.append(mat)
-        bpy.ops.object.editmode_toggle()
-
-    def delete(self):
+    if latest_sensor != None and current_sensor != latest_sensor:
+        #*pulisco la scena dagli oggetti usati per la precedente iterazione mantenendo la luce
         bpy.ops.object.select_all(action="SELECT")
+        bpy.data.objects['Lamp'].select = False
+        bpy.data.objects[bpy.context.object.name].select = False
         bpy.ops.object.delete()
+        render_cameras = load_cameras(current_sensor, camera_details)
 
-
-class Render_Scene:
-    def __init__(self, camera, point_cloud):
-        self.point_cloud = point_cloud
-
-        bpy.ops.object.camera_add(location=camera.position, rotation=camera.heading)
-        self.render_camera = bpy.context.object
-        self.render_camera.name = "camera"
-        render_camera.data.name = f"{render_camera.name}_Data"
+    #* Rendering
+    for render_camera in render_cameras:
         bpy.context.scene.camera = render_camera
-
-    def render(self, path):
+        path = f"//image_render/{current_sensor}/{bpy.context.scene.camera.name}_{substrings[2]}.png"
         bpy.context.scene.render.filepath = path
         bpy.context.scene.render.image_settings.file_format = "PNG"
         bpy.ops.render.render(use_viewport=True, write_still=True)
+    
+    latest_sensor = current_sensor
 
+    #*rimuovo la nuvola di punti precedente 
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.data.objects[point_cloud_name].select = True
+    bpy.ops.object.delete()
+# exit()
 
 # ? vecchio codice, prendere spunto per il nuovo
 # bpy.ops.import_mesh.ply(filepath="output.ply")
