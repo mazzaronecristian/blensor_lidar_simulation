@@ -7,10 +7,6 @@ Tesi.code-workspace
 *.csv
 !vehicle_keyframes.csv
 !sensor_keyframes.csv
-!camera_details.csv
 *.numpy
-!pitt_sensors_position.csv
-!pitt_trajectories.csv
 *.png
-!map.png
 ```
