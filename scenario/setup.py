@@ -9,6 +9,7 @@ setup(
         # Elenco delle dipendenze del tuo modulo
         "numpy",
         "pandas",
+        "fake-bpy-module-2.79",
     ],
     entry_points={
         "console_scripts": [],
