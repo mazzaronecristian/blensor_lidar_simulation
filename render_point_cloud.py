@@ -1,5 +1,5 @@
 import sys
-import render_ply as rp
+from scenario import render_ply as rp
 
 args = sys.argv
 args = args[args.index("--") + 1 :]  # get all args after "--"
