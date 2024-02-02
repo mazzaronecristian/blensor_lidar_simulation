@@ -12,7 +12,7 @@ if len(args) == 3 or len(args) < 2 and args[-1] != "h":
     print("Numero di argomenti non valido")
     exit(1)
 if args[-1] == "h":
-    print("blender [-b] -P scan.py -- <vehicles_traj> <sensors_pos> [<center_x>] [<center_y>]")
+    print("blender [-b] -P run_simulation.py -- <vehicles_traj> <sensors_pos> [<center_x>] [<center_y>]")
     print(
         "Esegue la simulazione con una data traiettoria; salva i file csv risultanti nella cartella './scans/csv'"
     )
