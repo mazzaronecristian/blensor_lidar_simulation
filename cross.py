@@ -55,7 +55,7 @@ vehicles_data = [
 vehicles = [sn.Vehicle(*data) for data in vehicles_data]
 
 scene = sn.Scene(vehicles, sensors=[sensor_ford, sensor_autobus])
-scene.build()
+scene.load()
 
 # * n_frame è uguale al numero di frame della traiettoria più corta
 n_frame = min(len(trajectory_1), len(trajectory_3))

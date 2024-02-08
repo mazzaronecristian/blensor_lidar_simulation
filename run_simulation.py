@@ -70,7 +70,7 @@ for i,sensor in enumerate(sensor_loc.iloc):
     )
 sensors = [sn.Sensor(*data) for data in sensors_data]
 scene = sn.Scene(vehicles, sensors, center)
-scene.build()
+scene.load()
 
 for i in range(n_frame):
     scene.scan(i)

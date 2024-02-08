@@ -71,7 +71,7 @@ for i, (dx, dy) in enumerate(product([-1, 1], repeat=2)):
     )
     scene.add_sensor(sensor)
 
-scene.build()
+scene.load()
 
 for i in range(n_frame):
     scene.scan(i)

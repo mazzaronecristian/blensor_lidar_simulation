@@ -9,6 +9,15 @@ import pandas as pd
 
 # import scenario as sn
 
+
+class Static_object:
+    def __init__(self, model, position, heading, name):
+        self.model = model
+        self.position = position
+        self.heading = heading
+        self.name = name
+
+
 class Vehicle:
     def __init__(self, model, keyframes, name, sensors=[]):
         self.model = model
@@ -32,6 +41,7 @@ class Vehicle:
 
     def add_sensor(self, sensor):
         self.sensors.append(sensor)
+
     def move(self, position, heading):
         self.position = position
         self.heading = heading
@@ -81,10 +91,43 @@ class Sensor:
         self.heading = heading
 
 
+class SceneBuilder:
+    def __init__(self):
+        self.vehicles = []
+        self.sensors = []
+        self.center = {"x": 0, "y": 0, "z": 0}
+
+    def with_vehicles(self, vehicles):
+        self.vehicles = vehicles
+        return self
+
+    def with_sensors(self, sensors):
+        self.sensors = sensors
+        return self
+
+    def with_center(self, center):
+        self.center = center
+        return self
+
+    def with_static_objects(self, static_objects):
+        self.static_objects = static_objects
+        return self
+
+    def build(self):
+        return Scene(self.vehicles, self.sensors, self.center)
+
+
 class Scene:
-    def __init__(self, vehicles=[], sensors=[], center = {"x": 0, "y": 0, "z": 0}):
+    def __init__(
+        self,
+        vehicles=[],
+        sensors=[],
+        static_objects=[],
+        center={"x": 0, "y": 0, "z": 0},
+    ):
         self.vehicles = vehicles
         self.sensors = sensors
+        self.static_objects = static_objects
         self.center = center
         self.center["z"] += 0.3
 
@@ -99,17 +142,7 @@ class Scene:
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.object.delete()
 
-    def build(self):
-        self.clean()
-
-        # * carico un pavimento di prova
-        bpy.ops.mesh.primitive_plane_add(
-            radius=10.0, location=(self.center["x"],self.center["y"],self.center["z"] ), rotation=(0, 0, 0)
-        )
-        bpy.context.object.name = "Plane"
-        bpy.context.object.data.name = "Plane_Data"
-        bpy.data.objects["Plane"].scale = (10, 10, 10)
-        # carica tutti i veicoli nella scena
+    def _load_objects(self):
         for vehicle in self.vehicles:
             bpy.ops.import_scene.obj(filepath=vehicle.model)
             car_object = bpy.context.selected_objects[0]
@@ -118,12 +151,34 @@ class Scene:
             car_object.name = vehicle.name
             car_object.data.name = f"{vehicle.name}_Data"
 
+        for static_object in self.static_objects:
+            bpy.ops.import_scene.obj(filepath=static_object.model)
+            static_object = bpy.context.selected_objects[0]
+            static_object.location = static_object.position
+            static_object.rotation_euler = static_object.heading
+            static_object.name = static_object.name
+            static_object.data.name = f"{static_object.name}_Data"
+
         # * carica tutti i sensori nella scena
         for sensor in self.sensors:
             bpy.ops.object.camera_add(location=sensor.position, rotation=sensor.heading)
             current_sensor = bpy.context.object
             current_sensor.name = sensor.name
             current_sensor.data.name = f"{sensor.name}_Data"
+
+    def load(self):
+        self.clean()
+
+        bpy.ops.mesh.primitive_plane_add(
+            radius=10.0,
+            location=(self.center["x"], self.center["y"], self.center["z"]),
+            rotation=(0, 0, 0),
+        )
+        bpy.context.object.name = "Plane"
+        bpy.context.object.data.name = "Plane_Data"
+        bpy.data.objects["Plane"].scale = (10, 10, 10)
+
+        self._load_objects()
 
     def update(self):
         for vehicle in self.vehicles:
