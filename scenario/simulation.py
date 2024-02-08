@@ -7,8 +7,6 @@ from math import *
 import numpy as np
 import pandas as pd
 
-# import scenario as sn
-
 
 class Static_object:
     def __init__(self, model, position, heading, name):
@@ -93,62 +91,76 @@ class Sensor:
 
 class SceneBuilder:
     def __init__(self):
-        self.vehicles = []
-        self.sensors = []
-        self.static_objects = []
-        self.center = {"x": 0, "y": 0, "z": 0}
+        self.scene = Scene()
 
     def with_vehicles(self, vehicles):
-        self.vehicles = vehicles
+        self.scene.vehicles = vehicles
         return self
 
     def with_sensors(self, sensors):
-        self.sensors = sensors
+        self.scene.sensors = sensors
         return self
 
     def with_center(self, center):
-        self.center = center
+        center["z"] += 0.3
+        self.scene.center = center
         return self
 
     def with_static_objects(self, static_objects):
-        self.static_objects = static_objects
+        self.scene.static_objects = static_objects
         return self
 
-    def build(self):
-        return Scene(
-            vehicles=self.vehicles,
-            sensors=self.sensors,
-            static_objects=self.static_objects,
-            center=self.center,
-        )
+    def build(self) -> "Scene":
+        return self.scene
 
 
 class Scene:
-    def __init__(
-        self,
-        vehicles=[],
-        sensors=[],
-        static_objects=None,
-        center={"x": 0, "y": 0, "z": 0},
-    ):
-        self.vehicles = vehicles
-        self.sensors = sensors
-        self.static_objects = static_objects
-        self.center = center
-        self.center["z"] += 0.3
+    """
+    Represents a scene in the simulation.
+
+    Attributes:
+        center (dict): The center coordinates of the scene.
+        vehicles (list): List of vehicles in the scene.
+        sensors (list): List of sensors in the scene.
+        static_objects (list): List of static objects in the scene.
+    """
+
+    def __init__(self):
+        self.center = {"x": 0, "y": 0, "z": 0.3}
+        self.vehicles = []
+        self.sensors = []
+        self.static_objects = []
 
     def add_vehicle(self, vehicle):
+        """
+        Adds a vehicle to the scene.
+
+        Args:
+            vehicle (Vehicle): The vehicle object to add.
+        """
         self.vehicles.append(vehicle)
 
     def add_sensor(self, sensor):
+        """
+        Adds a sensor to the scene.
+
+        Args:
+            sensor (Sensor): The sensor object to add.
+        """
         self.sensors.append(sensor)
 
     def clean(self):
+        """
+        Cleans the scene by deleting all objects.
+        """
         # * Elimina tutti gli oggetti nella scena
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.object.delete()
 
     def _load_objects(self):
+        """
+        Loads the vehicles, sensors, and static objects into the scene.
+        """
         for vehicle in self.vehicles:
             bpy.ops.import_scene.obj(filepath=vehicle.model)
             car_object = bpy.context.selected_objects[0]
@@ -157,16 +169,15 @@ class Scene:
             car_object.name = vehicle.name
             car_object.data.name = f"{vehicle.name}_Data"
 
-        # * carica tutti i sensori nella scena
         for sensor in self.sensors:
             bpy.ops.object.camera_add(location=sensor.position, rotation=sensor.heading)
             current_sensor = bpy.context.object
             current_sensor.name = sensor.name
             current_sensor.data.name = f"{sensor.name}_Data"
 
-        if self.static_objects is None:
-            return
         for static_object in self.static_objects:
+            if not hasattr(static_object, "model"):
+                continue
             bpy.ops.import_scene.obj(filepath=static_object.model)
             static_object = bpy.context.selected_objects[0]
             static_object.location = static_object.position
@@ -175,6 +186,9 @@ class Scene:
             static_object.data.name = f"{static_object.name}_Data"
 
     def load(self):
+        """
+        Loads the scene by creating a plane and loading objects into it.
+        """
         self.clean()
 
         bpy.ops.mesh.primitive_plane_add(
@@ -189,6 +203,9 @@ class Scene:
         self._load_objects()
 
     def update(self):
+        """
+        Updates the positions and orientations of vehicles and sensors in the scene.
+        """
         for vehicle in self.vehicles:
             vehicle.move()
             car_object = bpy.data.objects[vehicle.name]
@@ -204,10 +221,14 @@ class Scene:
                     current_sensor.location = sensor.position
                     current_sensor.rotation_euler = sensor.heading
 
-    # esegui un refactoring del codice per eliminare la ripetizione di codice
-
-    # * esegue una scansione e salva i dati in scans/csv/{sensor.name}_{i}.csv e scans/numpy/{sensor.name}_{i}.numpy
     def scan(self, i=None, filter=False):
+        """
+        Performs a scan using the sensors in the scene and saves the data.
+
+        Args:
+            i (int, optional): The index of the scan. Defaults to None.
+            filter (bool, optional): Whether to filter the data. Defaults to False.
+        """
         with open("data.json", "r") as file:
             data = json.load(file)
 
