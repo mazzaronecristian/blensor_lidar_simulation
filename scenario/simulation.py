@@ -95,6 +95,7 @@ class SceneBuilder:
     def __init__(self):
         self.vehicles = []
         self.sensors = []
+        self.static_objects = []
         self.center = {"x": 0, "y": 0, "z": 0}
 
     def with_vehicles(self, vehicles):
@@ -114,7 +115,12 @@ class SceneBuilder:
         return self
 
     def build(self):
-        return Scene(self.vehicles, self.sensors, self.center)
+        return Scene(
+            vehicles=self.vehicles,
+            sensors=self.sensors,
+            static_objects=self.static_objects,
+            center=self.center,
+        )
 
 
 class Scene:
@@ -122,7 +128,7 @@ class Scene:
         self,
         vehicles=[],
         sensors=[],
-        static_objects=[],
+        static_objects=None,
         center={"x": 0, "y": 0, "z": 0},
     ):
         self.vehicles = vehicles
@@ -151,6 +157,15 @@ class Scene:
             car_object.name = vehicle.name
             car_object.data.name = f"{vehicle.name}_Data"
 
+        # * carica tutti i sensori nella scena
+        for sensor in self.sensors:
+            bpy.ops.object.camera_add(location=sensor.position, rotation=sensor.heading)
+            current_sensor = bpy.context.object
+            current_sensor.name = sensor.name
+            current_sensor.data.name = f"{sensor.name}_Data"
+
+        if self.static_objects is None:
+            return
         for static_object in self.static_objects:
             bpy.ops.import_scene.obj(filepath=static_object.model)
             static_object = bpy.context.selected_objects[0]
@@ -158,13 +173,6 @@ class Scene:
             static_object.rotation_euler = static_object.heading
             static_object.name = static_object.name
             static_object.data.name = f"{static_object.name}_Data"
-
-        # * carica tutti i sensori nella scena
-        for sensor in self.sensors:
-            bpy.ops.object.camera_add(location=sensor.position, rotation=sensor.heading)
-            current_sensor = bpy.context.object
-            current_sensor.name = sensor.name
-            current_sensor.data.name = f"{sensor.name}_Data"
 
     def load(self):
         self.clean()
