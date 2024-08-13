@@ -4,6 +4,10 @@
 - conda e conda-forge
 - Blender 2.79 con Blensor: Installer sul sito ufficiale di [Blensor](https://www.blensor.org/pages/downloads.html)
 
+## Librerie da installare
+- pandas
+- [pyntcloud](https://github.com/daavoo/pyntcloud)
+
 ## configurazione
 
 Per configurare l'ambiente virtuale di Anaconda con Blender, seguire questo [thread](https://stackoverflow.com/questions/70639689/how-to-use-the-anaconda-environment-on-blender). La versione di python dell'ambiente virtuale deve essere la stessa di quella di Blender (3.6, nel caso di Blender 2.79, con cui funziona Blensor). Così facendo verrà creato un link simbolico tra l'ambiente virtuale e Blender.
