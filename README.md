@@ -7,6 +7,7 @@
 ## Librerie da installare
 - pandas
 - [pyntcloud](https://github.com/daavoo/pyntcloud)
+- [mathutils](https://pypi.org/project/mathutils/)
 
 ## configurazione
 
@@ -14,7 +15,7 @@ Per configurare l'ambiente virtuale di Anaconda con Blender, seguire questo [thr
 
 ### Configurare vs-code per Blender
 
-Per utilizzare vs-code con Blender, seguire questo [tutorial](https://www.youtube.com/watch?v=YUytEtaVrrc). Sostanzialmente è necessario installare il modulo python fake-bpy-module-2.79 (`pip install fake-bpy-module-2.79`) e l'estensione Blender Development di Jacques Lucke, per l'autocompletamento.
+Per utilizzare vs-code con Blender, seguire questo [tutorial](https://www.youtube.com/watch?v=YUytEtaVrrc). Sostanzialmente è necessario installare il modulo python fake-bpy-module-2.79 (`pip install fake-bpy-module-2.79`), per l'autocompletamento.
 
 ### Configurzione di "scenario"
 
